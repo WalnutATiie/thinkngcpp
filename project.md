@@ -40,7 +40,7 @@ HDFS块存储，使用json，dump序列化之后放入redis，HDFS端读redis，
 高亮：自带b标签  
 摘要截取：高亮关键词前30字节后70字节  
 搜索：普通搜索  
-spark与NetworkX图计算
+NetworkX图计算
 ## 2. 暗网爬虫
 ### 2.1 元搜索引擎采集
 使用的搜索引擎360、有道、bing、duckduckgo、disconnect、google、yahoo  
