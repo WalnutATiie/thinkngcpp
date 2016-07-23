@@ -12,7 +12,7 @@ LCS、LIS（动态规划、二维长度数组、滚动数组、LIS转化成LCS�
 字符串全排列（递归、有重复字母递归、非递归借助字典序下一个排列、哈希降低时间复杂度）、字典序的下一个排列  
 字符串编辑距离（动态规划）
 字符串旋转  
-最长回文子串  
+最长回文子串（Manacher算法）  
 atoi实现       
 KMP  
 DFA、NFA与正则表达式  
@@ -301,6 +301,40 @@ simhash主要分为5个步骤：分词、哈希、加权、合并、降维。
 大量simhash值的比较，将simhash签名分成4份，利用抽屉原理，至少一份是完全相同的。  
 simhash的运用：网页存储、网页重复判定、视频网站的重复、网盘网站的秒传。  
 ### 1X.8 HDFS、Spark
+### 1X.9 UML关系图
+[讲解](http://blog.csdn.net/suxinpingtao51/article/details/8011335)  
+### 1X.10 SQL语句总结
+1.基本查询：   
+(1)我只想查询某个表的某列时：SELECT col1,col2 from table1过滤掉不要的列字段;   
+(2)我想查询某行的信息时：使用where col1=1 and col2=2来过滤掉不要的行;   
+(3)我们可以使用group by来aggregate 数据，汇总时，显示的字段一般是汇总函数;   
+(4)我们可以使用having来过滤掉汇总后的数据;   
+(5)我们可以使用order by 来对我们查询的结果进行排序如 order by col2; 解释：select用来查询关键字段;distinct的关键字段返回的是唯一的结果 between a and b:用来限制一个值的范围；like：用来过滤某列的文本数据;in:某个值是否在里面   
+
+2.数据操作：   
+(1)我想更新表中col2等于2的col1值变为1的一行数据：update table1 set col1=1 where col2=2   
+(2)我想手工给table1插入数据：insert into table(col1,col2) values(1,2);   
+(3)查询插入数据，这个开发中一定用到:insert into table1(col1)select col2 from table2   
+
+3.视图（使用到复杂的查询） create view view1 as select co1 from table1 使用时select from view1   
+4.关联表查询：   
+(1)左关联：所有的行都从主表出即使子表中没有，一般包括多的拿来当主表；   
+(2)内连接：主表和子表都有的行；   
+(3)右关联和左关联意思一样；   
+
+5.关联查询更新数据（这个好像很厉害） update t1 set a=1 from table1 t1 join table2 t2 on t1.id=t2.id where t1.col1=0 and t2.col2 is null; 
+
+6.子查询： select from table1 where id in(select id from table2 where date>current\_timestamp) 
+
+7.索引 create index index1 on table1(id) 索引可以加速我们的delete和update的操作  
+
+8.非常有用的工具函数   
+(1)字符串变为日期类型：to\_date(oracle,postgresql)、str\_to\_date(musql)   
+(2)返回第一个字段不是null的字段：coalesce(col1,col2,"defualt");   
+(3)返回当前时间current_timestamp   
+(4)对两个查询结果做运算：union(返回两个表的所有数据)except（所有的行必须只有主表有，子表不能有） intersect：连个表都有的行    
+
+9.汇总函数： count：返回行数 sum：返回该列的所有和 avg：返回该列的平均值 min/max:返回该列的最大或者最小值 具体参考下图：
 
 ## 11. 项目相关
 
