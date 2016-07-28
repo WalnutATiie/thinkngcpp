@@ -2,23 +2,24 @@
 ## 1. 暗网搜索引擎与舆情监测
 ## 1.1 Elasticsearch检索集群
 将爬下来的网页去标签之后存入Elasticsearch，英文索引使用standard分析器，中文索引使用ik分析器，其他使用默认分析器。  
-去标签工具pattern.web，plaintext部分，支持定制去除的标签部分。在elasticsearch中存储的字段：content,title,domain_name,url_MD5,create_time,language,url,content_simhash  
-去重采用Url_MD5作为唯一标识，simhash用于内容去重。  
+去标签工具pattern.web，plaintext部分，支持定制去除的标签部分。在elasticsearch中存储的字段：content,title,domain\_name,url\_MD5,create\_time,language,url,content\_simhash  
+去重采用Url\_MD5作为唯一标识，simhash用于内容去重。  
 基于查询接口的检索，对于其他语言采用term查询进行完全匹配，对于存在分析器的中英文，采用基于lucene的match_query的查询，并将模糊匹配设置为2-gram，英文为3-gram  
 lucene查询接口待展开  
 查询响应时间优化，受限制与机器性能，使用match_phrase的查询耗时很长，size所影响，分页面取  
 设计可支持布尔查询  
 ### 1.2 排名优化
 查询相关度：VSM文档、query表示法，计算向量夹角余弦相似度、Okapi计算方法(短查询检索比余弦相似度更有效) 
-Elasticsearch中是基于lucene的计算方法，自带效果已经很好，rank值  
-返回的结果每一条都有一个评分，对该评分加权    
+Elasticsearch中是基于lucene的计算方法，自带效果已经很好，rank值 
+lucene的评分机制：tf、idf、boost、lengthNorm、coord、queryNorm，explain可用于理解搜索评分 
+返回的结果每一条都有一个评分，对该评分归一化之后进行加权    
 链接关系：域名级别的pagerank，包括非onion网站外链的链入，离线计算(数量万的数量级)，NetworkX  
 离线算出pagerank值归一化(每天计算一次)，作为参数相乘，调参    
 用户反馈：权值归一化，作为参数相乘，调参  
-网页质量：网页长度  
-最后根据simhash去除相似页面  
+网页质量：去标签后网页长度、标题长度（太短不行，太长也不行）  
+最后根据simhash去除相似页面 simhash原理：分词，哈希，加权，相加，降维  
 ### 1.3 基于NB的网页分类器
-这里主要还是借助了信息检索领域中的文本分类的方法。基于词袋模型。基于词袋模型的文本分类的重要前提是认为：文档的内容与其中所包含的词有着必然的联系。  
+这里主要还是借助了信息检索领域中的文本分类的方法。基于词袋模型。基于词袋模型的文本分类的重要前提是认为：文档的内容与其中所包含的词有着必然的联系。 
 VSM模型是文本分类问题的文档表示模型。  
 VSM模型是在词袋模型的基础之上的模型，完全忽略了除了词信息以外的所有部分，这使得其所能表达的信息量存在上限。  
 相比较于分类算法，对特征的选择会更影响分类的效果。  
@@ -33,11 +34,12 @@ VSM模型是在词袋模型的基础之上的模型，完全忽略了除了词�
 文本分类库：TextGrocery
 贝叶斯分类的推导
 ### 1.4 关键词生成方案  
-
+人工标注关注的线索信息之后（主要是暴力恐怖方面），以tf-idf生成该页面的词向量，选取较高的5个在元搜索引擎里查询，查询的到网页中再计算tf-idf，提取前几个结果作为关键词扩展。
+在离线分析模块加入词典，按照词典匹配匹配出相关敏感线索。算法效果一般，有一篇文章的作者特别喜欢用horrible形容词，计算出来horrible的tf-idf比较靠前，后续考虑加入NER，词性标注  
 ### 1.5 工程问题
 去标签pattern.web存到ES，网页存到hdfs做离线分析，后续ES读写分离，编写ES插件从kafka里pull数据  
 HDFS块存储，使用json，dump序列化之后放入redis，HDFS端读redis，组成arraylist，达到64MB后，再序列化写入hdfs文件块  
-高亮：自带b标签  
+ES中高亮：自带b标签  
 摘要截取：高亮关键词前30字节后70字节  
 搜索：普通搜索  
 NetworkX图计算
@@ -52,7 +54,7 @@ NetworkX图计算
 对于获取到的结果以页面url作为唯一标识使用投票排序，不同搜索引擎的结果有不同的权重    
 实时性优化采用延迟加载技术  
 借助于元搜索引擎的onion地址采集技术，循环搜索直到新地址不再出现为止  
-gevent协程的并发数据采集框架gtaskpool(zhangwentao的ppt，待总结)  
+gevent协程的并发数据采集框架gtaskpool，yield到gtaskpool里，然后join运行，限制gevent数量
 在线验证gtaskpool，urllib2，http、https、socks代理  
 说是协程池，因为协程的创建和删除并不需要资源消耗，完全是代码级别的切换，所以协程池就是限制了协程的数目  
 ### 2.2 分布式爬虫框架
