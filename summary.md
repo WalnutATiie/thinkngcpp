@@ -189,7 +189,7 @@ noexcept可以用于指示一个函数是否会抛出异常，同时可以用作
 新增基础类型、容器类型、new分配内存时的列表初始化。构建临时变量时也可以直接使用列表初始化。  
 可以直接对类内成员进行初始化/列表初始化。
 ### 3.11 C++对象模型
-虚函数表解析
+虚函数表解析。
 - 含有虚函数或其父类含有虚函数的类，编译器都会为其添加一个虚函数表，vptr。
 
 虚基类表解析。
@@ -310,32 +310,38 @@ simhash的运用：网页存储、网页重复判定、视频网站的重复、�
 (3)我们可以使用group by来aggregate 数据，汇总时，显示的字段一般是汇总函数;   
 (4)我们可以使用having来过滤掉汇总后的数据;   
 (5)我们可以使用order by 来对我们查询的结果进行排序如 order by col2; 解释：select用来查询关键字段;distinct的关键字段返回的是唯一的结果 between a and b:用来限制一个值的范围；like：用来过滤某列的文本数据;in:某个值是否在里面   
-
 2.数据操作：   
 (1)我想更新表中col2等于2的col1值变为1的一行数据：update table1 set col1=1 where col2=2   
 (2)我想手工给table1插入数据：insert into table(col1,col2) values(1,2);   
 (3)查询插入数据，这个开发中一定用到:insert into table1(col1)select col2 from table2   
-
 3.视图（使用到复杂的查询） create view view1 as select co1 from table1 使用时select from view1   
 4.关联表查询：   
 (1)左关联：所有的行都从主表出即使子表中没有，一般包括多的拿来当主表；   
 (2)内连接：主表和子表都有的行；   
 (3)右关联和左关联意思一样；   
-
-5.关联查询更新数据（这个好像很厉害） update t1 set a=1 from table1 t1 join table2 t2 on t1.id=t2.id where t1.col1=0 and t2.col2 is null; 
-
+5.关联查询更新数据（这个好像很厉害） update t1 set a=1 from table1 t1 join table2 t2 on t1.id=t2.id where t1.col1=0 and t2.col2 is null;   
 6.子查询： select from table1 where id in(select id from table2 where date>current\_timestamp) 
-
 7.索引 create index index1 on table1(id) 索引可以加速我们的delete和update的操作  
-
 8.非常有用的工具函数   
 (1)字符串变为日期类型：to\_date(oracle,postgresql)、str\_to\_date(musql)   
 (2)返回第一个字段不是null的字段：coalesce(col1,col2,"defualt");   
 (3)返回当前时间current_timestamp   
 (4)对两个查询结果做运算：union(返回两个表的所有数据)except（所有的行必须只有主表有，子表不能有） intersect：连个表都有的行    
-
 9.汇总函数： count：返回行数 sum：返回该列的所有和 avg：返回该列的平均值 min/max:返回该列的最大或者最小值 具体参考下图：
-
+### 1X.11 rabbitmq消息队列
+子系统和模块通信、传统IPC。  
+应用场景：  
+1）信息的发送者和接收者如何维持这个连接，如果一方的连接中断，这期间的数据如何方式丢失？  
+2）如何降低发送者和接收者的耦合度？  
+3）如何让Priority高的接收者先接到数据？  
+4）如何做到load balance？有效均衡接收者的负载？  
+5）如何有效的将数据发送到相关的接收者？也就是说将接收者subscribe 不同的数据，如何做有效的filter。  
+6）如何做到可扩展，甚至将这个通信模块发到cluster上？  
+7）如何保证接收者接收到了完整，正确的数据？  
+rabbitmq架构图  
+<img src="rabbitmqframework.jpg">  
+exchange三种类型：direct、fanout、dispatch  
+普通传输、任务分发机制（load blance）、topic、routine、RPC
 ## 11. 项目相关
 
 
